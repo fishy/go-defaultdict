@@ -11,7 +11,7 @@ import (
 // This example demonstrates how to use defaultdict to implement a thread-safe
 // counter.
 func Example() {
-	generator := func() interface{} {
+	generator := func() defaultdict.Pointer {
 		// Just create a new *int64 so it can be used as atomic int64.
 		return new(int64)
 	}
@@ -28,7 +28,7 @@ func Example() {
 	}
 
 	wg.Wait()
-	d.Range(func(key defaultdict.Comparable, value interface{}) bool {
+	d.Range(func(key defaultdict.Comparable, value defaultdict.Pointer) bool {
 		fmt.Printf("Key %v was added %d times\n", key, atomic.LoadInt64(value.(*int64)))
 		return true
 	})
@@ -48,8 +48,8 @@ func Example() {
 
 // This example demonstrates how to use SharedPoolGenerator to implement a
 // thread-safe counter with 2 layers of keys.
-func ExampleSharedPoolGenerator() {
-	generator := defaultdict.SharedPoolGenerator(func() interface{} {
+func ExampleSharedPoolMapGenerator() {
+	generator := defaultdict.SharedPoolMapGenerator(func() defaultdict.Pointer {
 		// Just create a new *int64 so it can be used as atomic int64.
 		return new(int64)
 	})
@@ -61,16 +61,16 @@ func ExampleSharedPoolGenerator() {
 				wg.Add(1)
 				go func(key1, key2 defaultdict.Comparable) {
 					defer wg.Done()
-					atomic.AddInt64(d.Get(key1).(defaultdict.DefaultDict).Get(key2).(*int64), 1)
+					atomic.AddInt64(d.Get(key1).(defaultdict.Map).Get(key2).(*int64), 1)
 				}(fmt.Sprintf("key1-%d", i), fmt.Sprintf("key2-%d", j))
 			}
 		}
 	}
 
 	wg.Wait()
-	d.Range(func(key1 defaultdict.Comparable, value1 interface{}) bool {
-		m := value1.(defaultdict.DefaultDict)
-		m.Range(func(key2 defaultdict.Comparable, value2 interface{}) bool {
+	d.Range(func(key1 defaultdict.Comparable, value1 defaultdict.Pointer) bool {
+		m := value1.(defaultdict.Map)
+		m.Range(func(key2 defaultdict.Comparable, value2 defaultdict.Pointer) bool {
 			fmt.Printf("%v/%v was added %d times\n", key1, key2, atomic.LoadInt64(value2.(*int64)))
 			return true
 		})
