@@ -70,6 +70,10 @@ m.Range(func(key defaultdict.Comparable, value defaultdict.Pointer) bool {
 })
 ```
 
+## License
+
+[BSD License](LICENSE).
+
 [python-defaultdict]: https://docs.python.org/3/library/collections.html#collections.defaultdict
 [sync-map]: https://pkg.go.dev/sync#Map
 [sync-pool]: https://pkg.go.dev/sync#Pool
