@@ -15,26 +15,7 @@ package defaultdict
 //
 // As an example, you can use *int64 as Pointer, and do mutations via atomic
 // int64 operations. But slices, even though they are pointers, should not be
-// used here directly. You usually need to pair slice with a lock, for example:
-//
-//     type myValue struct{
-//       lock sync.Lock
-//       // Note that this must be the pointer to the slice,
-//       // because append calls could change the slice itself.
-//       slice *[]int
-//     }
-//
-//     func (m *myValue) Append(i int) {
-//       m.lock.Lock()
-//       defer m.lock.Unlock()
-//       *m.slice = append(*m.slice, i)
-//     }
-//
-//     func myValueGenerator() defaultdict.Pointer {
-//       return &myValue{
-//         slice: new([]int),
-//       }
-//     }
+// used here directly. You usually need to pair slice with a lock.
 type Pointer = any
 
 // Map defines a map.
