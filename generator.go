@@ -5,12 +5,14 @@ import (
 )
 
 // Generator defines the function used to generate the default value of the map.
-type Generator func() Pointer
+type Generator[T Pointer] func() T
 
 // ToPool creates a *sync.Pool from this Generator.
-func (g Generator) ToPool() *sync.Pool {
+func (g Generator[T]) ToPool() *sync.Pool {
 	return &sync.Pool{
-		New: g,
+		New: func() any {
+			return g()
+		},
 	}
 }
 
@@ -19,8 +21,8 @@ func (g Generator) ToPool() *sync.Pool {
 //
 // It's different from just:
 //
-//     func() defaultdict.Pointer {
-//       return defaultdict.New(g)
+//     func generator[K comparable, V defaultdict.Pointer](g defaultdict.Generator[V]) Map[K, V] {
+//       return defaultdict.New[K](g)
 //     }
 //
 // That the Map returned by the same SharedPoolMapGenerator shares the same
@@ -30,18 +32,19 @@ func (g Generator) ToPool() *sync.Pool {
 //
 // This is an example of running the benchmark test with go1.15.6:
 //
-//     $ go test -bench . -benchmem
+//     $ go test -bench .
 //     goos: linux
 //     goarch: amd64
 //     pkg: go.yhsif.com/defaultdict
-//     BenchmarkSharedPoolMapGenerator/shared-4                    9459            121219 ns/op            1093 B/op          5 allocs/op
-//     BenchmarkSharedPoolMapGenerator/naive-4                     9246            123866 ns/op            3289 B/op         14 allocs/op
+//     cpu: Intel(R) Core(TM) i5-7260U CPU @ 2.20GHz
+//     BenchmarkSharedPoolMapGenerator/shared-4                    9691            117636 ns/op            1093 B/op          5 allocs/op
+//     BenchmarkSharedPoolMapGenerator/naive-4                     9882            121344 ns/op            3305 B/op         15 allocs/op
 //     PASS
-//     ok      go.yhsif.com/defaultdict        2.322s
-func SharedPoolMapGenerator(g Generator) Generator {
+//     ok      go.yhsif.com/defaultdict        2.368s
+func SharedPoolMapGenerator[K comparable, V Pointer](g Generator[V]) Generator[Map[K, V]] {
 	p := g.ToPool()
-	return func() Pointer {
-		return &defaultdict{
+	return func() Map[K, V] {
+		return &defaultdict[K, V]{
 			pool: p,
 		}
 	}

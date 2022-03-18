@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-type defaultdict struct {
+type defaultdict[K comparable, V Pointer] struct {
 	m    sync.Map
 	pool *sync.Pool
 }
@@ -12,38 +12,40 @@ type defaultdict struct {
 // New creates a new DefaultDict.
 //
 // It pairs a sync.Map with a sync.Pool under the hood.
-func New(g Generator) Map {
-	return &defaultdict{
+func New[K comparable, V Pointer](g Generator[V]) Map[K, V] {
+	return &defaultdict[K, V]{
 		pool: g.ToPool(),
 	}
 }
 
-func (d *defaultdict) Delete(key Comparable) {
+func (d *defaultdict[K, V]) Delete(key K) {
 	d.m.Delete(key)
 }
 
-func (d *defaultdict) Load(key Comparable) (Pointer, bool) {
+func (d *defaultdict[K, V]) Load(key K) (V, bool) {
 	newValue := d.pool.Get()
 	value, loaded := d.m.LoadOrStore(key, newValue)
 	if loaded {
 		d.pool.Put(newValue)
 	}
-	return value, loaded
+	return value.(V), loaded
 }
 
-func (d *defaultdict) Get(key Comparable) Pointer {
+func (d *defaultdict[K, V]) Get(key K) V {
 	v, _ := d.Load(key)
 	return v
 }
 
-func (d *defaultdict) LoadAndDelete(key Comparable) (Pointer, bool) {
+func (d *defaultdict[K, V]) LoadAndDelete(key K) (V, bool) {
 	value, loaded := d.m.LoadAndDelete(key)
 	if !loaded {
 		value = d.pool.Get()
 	}
-	return value, loaded
+	return value.(V), loaded
 }
 
-func (d *defaultdict) Range(f func(key Comparable, value Pointer) bool) {
-	d.m.Range(f)
+func (d *defaultdict[K, V]) Range(f func(key K, value V) bool) {
+	d.m.Range(func(k, v any) bool {
+		return f(k.(K), v.(V))
+	})
 }

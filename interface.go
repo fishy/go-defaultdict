@@ -1,12 +1,5 @@
 package defaultdict
 
-// Comparable is the key type of a Map.
-//
-// It's used for documentation purpose only.
-//
-// See https://golang.org/ref/spec#Comparison_operators for more info.
-type Comparable = interface{}
-
 // Pointer is the value type of a Map.
 //
 // It's used for documentation purpose only.
@@ -42,7 +35,7 @@ type Comparable = interface{}
 //         slice: new([]int),
 //       }
 //     }
-type Pointer = interface{}
+type Pointer = any
 
 // Map defines a map.
 //
@@ -55,13 +48,13 @@ type Pointer = interface{}
 //
 // 2. The bool return being false means that the value is directly from the
 // Generator.
-type Map interface {
+type Map[K comparable, V Pointer] interface {
 	// Same as in sync.Map, see above for notes about the bool returns.
-	Delete(key Comparable)
-	Load(key Comparable) (Pointer, bool)
-	LoadAndDelete(key Comparable) (Pointer, bool)
-	Range(f func(key Comparable, value Pointer) bool)
+	Delete(key K)
+	Load(key K) (V, bool)
+	LoadAndDelete(key K) (V, bool)
+	Range(f func(key K, value V) bool)
 
 	// Same as Load, just without the bool return.
-	Get(key Comparable) Pointer
+	Get(key K) V
 }

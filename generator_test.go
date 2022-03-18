@@ -9,29 +9,34 @@ import (
 
 func BenchmarkSharedPoolMapGenerator(b *testing.B) {
 	const n = 5
-	g := func() defaultdict.Pointer {
+	g := func() *int64 {
 		return new(int64)
 	}
 	for _, c := range []struct {
 		label string
-		m     defaultdict.Map
+		g     defaultdict.Generator[defaultdict.Map[int, *int64]]
 	}{
 		{
 			label: "shared",
-			m:     defaultdict.New(defaultdict.SharedPoolMapGenerator(g)),
+			g:     defaultdict.SharedPoolMapGenerator[int](g),
 		},
 		{
 			label: "naive",
-			m: defaultdict.New(func() defaultdict.Pointer {
-				return defaultdict.New(g)
-			}),
+			g: func() defaultdict.Map[int, *int64] {
+				return defaultdict.New[int](g)
+			},
 		},
 	} {
 		b.Run(c.label, func(b *testing.B) {
+			b.ReportAllocs()
+
+			m := defaultdict.New[int](c.g)
+			b.ResetTimer()
+
 			for i := 0; i < b.N; i++ {
 				for j := 0; j < n; j++ {
 					for k := 0; k < n; k++ {
-						c.m.Get(j).(defaultdict.Map).Get(k)
+						m.Get(j).Get(k)
 					}
 				}
 				runtime.GC()
