@@ -49,3 +49,11 @@ func (d *defaultdict[K, V]) Range(f func(key K, value V) bool) {
 		return f(k.(K), v.(V))
 	})
 }
+
+func (d *defaultdict[K, V]) All() func(yield func(K, V) bool) {
+	return func(yield func(K, V) bool) {
+		d.m.Range(func(k, v any) bool {
+			return yield(k.(K), v.(V))
+		})
+	}
+}

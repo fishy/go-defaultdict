@@ -38,4 +38,7 @@ type Map[K comparable, V Pointer] interface {
 
 	// Same as Load, just without the bool return.
 	Get(key K) V
+
+	// Implements iter.Seq2[key, value]
+	All() func(yield func(K, V) bool)
 }
