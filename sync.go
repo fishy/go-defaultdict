@@ -1,6 +1,7 @@
 package defaultdict
 
 import (
+	"iter"
 	"sync"
 )
 
@@ -50,7 +51,7 @@ func (d *defaultdict[K, V]) Range(f func(key K, value V) bool) {
 	})
 }
 
-func (d *defaultdict[K, V]) All() func(yield func(K, V) bool) {
+func (d *defaultdict[K, V]) All() iter.Seq2[K, V] {
 	return func(yield func(K, V) bool) {
 		d.m.Range(func(k, v any) bool {
 			return yield(k.(K), v.(V))

@@ -1,5 +1,9 @@
 package defaultdict
 
+import (
+	"iter"
+)
+
 // Pointer is the value type of a Map.
 //
 // It's used for documentation purpose only.
@@ -40,5 +44,5 @@ type Map[K comparable, V Pointer] interface {
 	Get(key K) V
 
 	// Implements iter.Seq2[key, value]
-	All() func(yield func(K, V) bool)
+	All() iter.Seq2[K, V]
 }
