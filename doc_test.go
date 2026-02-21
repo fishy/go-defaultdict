@@ -17,7 +17,7 @@ func Example() {
 	}
 	m := defaultdict.New[string](generator)
 	var wg sync.WaitGroup
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		for j := 0; j < i; j++ {
 			wg.Add(1)
 			go func(key string) {

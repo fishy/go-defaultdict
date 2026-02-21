@@ -34,8 +34,8 @@ func BenchmarkSharedPoolMapGenerator(b *testing.B) {
 			b.ResetTimer()
 
 			for i := 0; i < b.N; i++ {
-				for j := 0; j < n; j++ {
-					for k := 0; k < n; k++ {
+				for j := range n {
+					for k := range n {
 						m.Get(j).Get(k)
 					}
 				}
