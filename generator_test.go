@@ -29,14 +29,11 @@ func BenchmarkSharedPoolMapGenerator(b *testing.B) {
 	} {
 		b.Run(c.label, func(b *testing.B) {
 			b.ReportAllocs()
-
 			m := defaultdict.New[int](c.g)
-			b.ResetTimer()
-
-			for i := 0; i < b.N; i++ {
-				for j := range n {
-					for k := range n {
-						m.Get(j).Get(k)
+			for b.Loop() {
+				for i := range n {
+					for j := range n {
+						m.Get(i).Get(j)
 					}
 				}
 				runtime.GC()
